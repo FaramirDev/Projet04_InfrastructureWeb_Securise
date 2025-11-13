@@ -42,7 +42,8 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
 
 ---
 
-## Etape 1 : Configuration réseau - VM-Serveur
+## ![Static Badge](https://img.shields.io/badge/ETAPE%20n°1-8A2BE2) : Configuration réseau - VM-Serveur
+
 1. VM Créé via VirtualBox : 
     - OS : Ubuntu Server 22.04 - minimal graphic
     - 2 Pattes Réseaux NATNetwork : 
@@ -55,7 +56,8 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
 
     - S'assurer que tout est à jours : `sudo apt update && sudo apt upgrade -y`
 
-    - Un Fichier de Configuration IP avec Netplan a été créé au format `.yaml` ici : `/etc/netplan/00-installer-config.yaml`
+    - Un Fichier de Configuration IP avec Netplan a été créé au format `.yaml` 
+    ici : `/etc/netplan/00-installer-config.yaml`
     ```yaml 
     network:
         version: 2
