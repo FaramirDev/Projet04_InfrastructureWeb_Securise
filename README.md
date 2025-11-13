@@ -42,7 +42,7 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
 
 ---
 
-## ![Static Badge](https://img.shields.io/badge/Etape%201?style=flat&logoSize=auto) : Configuration réseau - VM-Serveur
+## ![Static Badge](https://img.shields.io/badge/ETAPE%20n°1-8A2BE2) : Configuration réseau - VM-Serveur
 
 1. VM Créé via VirtualBox : 
     - OS : Ubuntu Server 22.04 - minimal graphic
