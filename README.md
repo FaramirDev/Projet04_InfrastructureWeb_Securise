@@ -1,6 +1,6 @@
 # 🌐 Mettez en place des infrastructures et services Web sécurisés
 
-# <span style="color:#0099FF">Mettez en place des infrastructures et services Web sécurisés</span>
+<span style="color:#0099FF">Mettez en place des infrastructures et services Web sécurisés</span>
 
 **Projet n°04 Réalisé dans le cadre de la Formation Openclassrooms d'Administrateur systeme réseaux et Cybersécurité**
 
