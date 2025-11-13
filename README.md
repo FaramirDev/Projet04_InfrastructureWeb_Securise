@@ -1,8 +1,8 @@
-# 🌐 Mettez en place des infrastructures et services Web sécurisés
+# Mettez en place des infrastructures et services Web sécurisés
 
 **Projet n°04 Réalisé dans le cadre de la Formation Openclassrooms d'Administrateur systeme réseaux et Cybersécurité**
 
-## Mission 
+## ![Static Badge](https://img.shields.io/badge/Mission%20-red) Detail Mission 
 **Objectif :** Créer un prototype opérationnel pour **l’EXTRANET** et **l’INTRANET** de la **mairie de Valserac**, 
 - incluant : 
     - Serveur LAMP sécurisé, 
@@ -16,7 +16,7 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
 
 --- 
 
-## Objectifs Detaillé :
+## ![Static Badge](https://img.shields.io/badge/Objectif%20-blue) Détail Objectif
 - **n°1.** Installer et configurer une VM Linux avec Ubuntu Server pour le serveur LAMP.
     - Avec deux Pattes Réseaux : 
         - Public simulé avec `150.10.0.0/16`
@@ -42,7 +42,7 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
 
 ---
 
-## ![Static Badge](https://img.shields.io/badge/ETAPE%20n°1-8A2BE2) : Configuration réseau - VM-Serveur
+## ![Static Badge](https://img.shields.io/badge/ETAPE%20n°1-8A2BE2) Configuration réseau - VM-Serveur
 
 1. VM Créé via VirtualBox : 
     - OS : Ubuntu Server 22.04 - minimal graphic
@@ -76,7 +76,7 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
     - La configuration réseau a été appliqué via : `sudo netplan apply`
     
 
-**Configuration LAB** :
+## **![Static Badge](https://img.shields.io/badge/LABS%20-8A2BE2) Configuration** 
 |         | SERVEUR | DEV | GRAPHISTE |
 |----------|--------|-----------|-----------|
 | OS      | Ubuntu-Serveur 22.04 | Ubuntu 22.04 | Ubuntu 22.04 |
