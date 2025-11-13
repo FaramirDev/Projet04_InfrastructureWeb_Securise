@@ -45,7 +45,7 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
 ## Etape 1 : Configuration réseau - VM-Serveur
 1. VM Créé via VirtualBox : 
     - OS : Ubuntu Server 22.04 - minimal graphic
-    - 2 Pattes Réseaux NAT : 
+    - 2 Pattes Réseaux NATNetwork : 
         - `192.168.10.0/24`
         - `150.10.0.0/16`
 
@@ -54,19 +54,35 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
     - Pour extranet (eth1) : `150.10.0.5/16`
 
     - Fichier de Configuration IP avec Netplan créé ici : `/etc/netplan/00-installer-config.yaml`
-    ```yaml network:
+    ```yaml 
+    network:
         version: 2
         ethernets:
             eth0:
                 dhcp4: no
-                addresses: [192.168.10.10/24]
+                addresses: [192.168.10.5/24]
                 gateway4: 192.168.10.1
                 nameservers:
                     addresses: [8.8.8.8,8.8.4.4]
             eth1:
                 dhcp4: no
-                addresses: [150.10.0.10/16]           
+                addresses: [150.10.0.5/16]           
     ```
 
     - Appliquer la Configuration : `sudo netplan apply`
 
+**Configuration LAB** via VirtualBox :
+|         | SERVEUR | DEV | GRAPHISTE |
+|----------|--------|-----------|-----------|
+| OS      | Ubuntu-Serveur 22.04 | Ubuntu 22.04 | Ubuntu 22.04 |
+| Nom DNS | vm-serveur| vm-dev | vm-graphiste |
+| IP Privé | `192.168.10.5` | `192.168.10.10` | `192.168.10.12` |
+| IP Public simulé | `150.10.0.5` | `150.10.0.10` | `150.10.0.12` |
+
+- Ici le DNS à été simulié via `/etc/hosts` de chaque machine
+
+On a donc mainteant :
+- [x] Serveur Configuré
+- [x] Machine Dev Test Configuré
+- [x] Machine Graphiste Test Configuré
+- [x] Réseaux Fonctionnel inter-machine
