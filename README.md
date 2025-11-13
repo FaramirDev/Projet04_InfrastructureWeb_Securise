@@ -31,7 +31,7 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
 - **n°4.** Mettre en place un serveur FTPS sécurisé
     - Les **developpeur** ont *acces* a l'ensemble des fichiers `/Extranet` et `/Intranet`
     - Les **graphistes** ont *accès* seulement aux Dossiers `/Images` de chaque sites, Extranet et Intranet
-    - Toute personne ayant *acces* à l'Extranet doit pouvoir deposer un fichier .PDF dans le dossier `/pdf` dans Extranet depuis l'Extranet
+    - Toute personne ayant *acces* à l'Extranet doit pouvoir deposer un fichier au format `.PDF` dans le dossier `/pdf` dans Extranet depuis l'Extranet
 
 - **n°5.** Configurer un filtrage réseau strict :
     - Avec UFW
@@ -53,7 +53,9 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
     - Pour intranet (eth0) : `192.168.10.5/24`
     - Pour extranet (eth1) : `150.10.0.5/16`
 
-    - Fichier de Configuration IP avec Netplan créé ici : `/etc/netplan/00-installer-config.yaml`
+    - S'assurer que tout est à jours : `sudo apt update && sudo apt upgrade -y`
+
+    - Un Fichier de Configuration IP avec Netplan a été créé au format `.yaml` ici : `/etc/netplan/00-installer-config.yaml`
     ```yaml 
     network:
         version: 2
@@ -68,10 +70,11 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
                 dhcp4: no
                 addresses: [150.10.0.5/16]           
     ```
+    
+    - La configuration réseau a été appliqué via : `sudo netplan apply`
+    
 
-    - Appliquer la Configuration : `sudo netplan apply`
-
-**Configuration LAB** via VirtualBox :
+**Configuration LAB** :
 |         | SERVEUR | DEV | GRAPHISTE |
 |----------|--------|-----------|-----------|
 | OS      | Ubuntu-Serveur 22.04 | Ubuntu 22.04 | Ubuntu 22.04 |
@@ -86,3 +89,4 @@ On a donc mainteant :
 - [x] Machine Dev Test Configuré
 - [x] Machine Graphiste Test Configuré
 - [x] Réseaux Fonctionnel inter-machine
+
