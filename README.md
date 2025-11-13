@@ -178,7 +178,9 @@ Rappels Dossier de Configuration : `/etc/apache2/`
 └── ports.conf                  ## Fichier Configuration des ports 
 ```
 ---
+![Static Badge](https://img.shields.io/badge/Certificat%20SSL%20-8A7BE2)
 ### **Génération de Certificats SSL Auto-signé avec `openssl`**
+
 
 - Pour **extranet.valserac.com** :
 ```bash
@@ -218,6 +220,7 @@ sudo openssl req -x509 -nodes -days 365 \   ## Generation ssl
     - Email Address : admin@valserac.com (fictif)
 
 ---
+![Static Badge](https://img.shields.io/badge/VirtualHost-8A7BE2) ![Static Badge](https://img.shields.io/badge/Extranet-8A5BE2)
 ### Creation des fichiers Virtual Host - VHost
 - Pour **extranet.valserac.com**
 ```bash
@@ -285,6 +288,7 @@ sudo systemctl restart apache2      ## Relancer
 ```
 
 ---
+![Static Badge](https://img.shields.io/badge/VirtualHost-8A7BE2) ![Static Badge](https://img.shields.io/badge/Extranet-8A5BE2) ![Static Badge](https://img.shields.io/badge/test-7A1CD4) 
 ### Teste realisé sur la `vm-graphiste` et `vm-dev`
 - Configuration du `/ect/hosts/` pour `150.10.0.5 extranet.valserac.com`
 
@@ -298,6 +302,7 @@ On a donc un Extranet sur **extranet.valserac.com**:
 - [x] **Certificat SSL Actif** sur *extranet.valserac.com*
 
 ---
+![Static Badge](https://img.shields.io/badge/VirtualHost-8A7BE2) ![Static Badge](https://img.shields.io/badge/Intranet-8A5BE2)
 - Pour **intranet.valserac.com** :
     - Ici, pour l'intranet, le choix c'est porté d'écouter sur `5501` pour le HTTP et `5502` pour le HTTPS afin d'eviter les ports trop evident.
     - On va également **restreindre l'accès**, seulement sur la patte Réseau `192.168.10.0/24` 
@@ -372,6 +377,8 @@ Nous pouvons maintenant passez à la **configuration** de la VHost nommé **intr
 Une fois **activé** avec le m**odule a2** et **relancé le systeme** apache avec les commandes plus haut. Nous pouvons donc maintenant tester sur nos `vm-dev` et `vm-graphiste`
 
 ---
+![Static Badge](https://img.shields.io/badge/VirtualHost-8A7BE2) ![Static Badge](https://img.shields.io/badge/Intranet-8A5BE2) ![Static Badge](https://img.shields.io/badge/test-7A1CD4) 
+
 ### Teste realisé sur la `vm-graphiste` et `vm-dev`
 - Configuration du `/ect/hosts/` pour `192.168.10.5 intranet.valserac.com`
 
@@ -380,6 +387,6 @@ Une fois **activé** avec le m**odule a2** et **relancé le systeme** apache ave
 ![Test Extranet sur HTTPS](./captures/capture_intranet_certificat.jpeg)
 
 On a donc un Intranet sur **intranet.valserac.com**:
-- [x] **Ouvert** sur l'interface 192.168.10.5 du serveur
+- [x] **Ouvert** sur l'interface 192.168.10.5 et uniquement accessible par la patte réseau `192.168.10.0/24`
 - [x] **Redirection Actif** de `:5501` → `:5502` en HTTPS
 - [x] **Certificat SSL Actif** sur *intranet.valserac.com*
