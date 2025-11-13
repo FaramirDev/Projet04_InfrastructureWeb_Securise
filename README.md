@@ -268,7 +268,6 @@ sudo openssl req -x509 -nodes -days 365 \   ## Generation ssl
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/extranet_access.log combined
 </VirtualHost>
-
 ```
 
 - Activé le site → lien symbobique de `sites-available` à `site-enable`
@@ -285,5 +284,5 @@ sudo systemctl restart apache2      ## Relancer
 
 - **Teste realisé sur la `vm-graphiste` et `vm-dev`**
 
-![Test Extranet sur HTTPS](./captures/capture_extranet_https.png)        Configuration du `/ect/hosts/` pour `150.10.0.5 extranet.valserac.com`
-![Test Extranet sur HTTPS](./captures/capture-extranet.png)
+![Test Extranet sur HTTPS](./captures/capture_extranet_https.jpeg)        Configuration du `/ect/hosts/` pour `150.10.0.5 extranet.valserac.com`
+![Test Extranet sur HTTPS](./captures/capture_extranet.jpeg)
