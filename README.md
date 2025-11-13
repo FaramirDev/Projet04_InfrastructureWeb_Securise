@@ -92,6 +92,7 @@ On a donc maintenant :
 - [x] Machine Graphiste Test Configuré
 - [x] Réseaux Fonctionnel inter-machine
 
+---
 ## ![Static Badge](https://img.shields.io/badge/ETAPE%20n°2-8A7BE2) Installation du Serveur Web
 
 ### ![Static Badge](https://img.shields.io/badge/apache2%20-8A7BE2) Installation
@@ -136,7 +137,7 @@ sudo chown -R www-data:www-data /var/www/extranet.valserac.com
 sudo chown -R www-data:www-data /var/www/intranet.valserac.com
 sudo chmod -R 755 /var/www
 ```
- 
+---
 ### ![Static Badge](https://img.shields.io/badge/apache2%20-8A7BE2) Configuration
 
 - Rappels des Objectifs : 
@@ -176,7 +177,7 @@ Rappels Dossier de Configuration : `/etc/apache2/`
 ├── apache2.conf               ## Configuration global d'apache2   
 └── ports.conf                  ## Fichier Configuration des ports 
 ```
-
+---
 ### **Génération de Certificats SSL Auto-signé avec `openssl`**
 
 - Pour **extranet.valserac.com** :
@@ -216,6 +217,7 @@ sudo openssl req -x509 -nodes -days 365 \   ## Generation ssl
     - Common Name : *intranet.valserac.com*
     - Email Address : admin@valserac.com (fictif)
 
+---
 ### Creation des fichiers Virtual Host - VHost
 - Pour **extranet.valserac.com**
 ```bash
@@ -282,7 +284,102 @@ sudo apache2ctl configtest          ## Si synthaxe Ok
 sudo systemctl restart apache2      ## Relancer
 ```
 
-- **Teste realisé sur la `vm-graphiste` et `vm-dev`**
+---
+### Teste realisé sur la `vm-graphiste` et `vm-dev`
+- Configuration du `/ect/hosts/` pour `150.10.0.5 extranet.valserac.com`
 
-![Test Extranet sur HTTPS](./captures/capture_extranet_https.jpeg)        Configuration du `/ect/hosts/` pour `150.10.0.5 extranet.valserac.com`
+![Test Extranet sur HTTPS](./captures/capture_extranet_https.jpeg)       
 ![Test Extranet sur HTTPS](./captures/capture_extranet.jpeg)
+![Test Extranet sur HTTPS](./captures/capture_extranet_certificat.jpeg)
+
+On a donc un Extranet sur **extranet.valserac.com**:
+- [x] **Ouvert** sur l'interface 150.10.0.5 du serveur
+- [x] **Redirection Actif** de `:80` → `:443` en HTTPS
+- [x] **Certificat SSL Actif** sur *extranet.valserac.com*
+
+---
+- Pour **intranet.valserac.com** :
+    - Ici, pour l'intranet, le choix c'est porté d'écouter sur `5501` pour le HTTP et `5502` pour le HTTPS afin d'eviter les ports trop evident.
+    - On va également **restreindre l'accès**, seulement sur la patte Réseau `192.168.10.0/24` 
+
+- Dans un premier temps, nous devons donc **ajouter** à Apache l'écoute sur le port `5501` et `5502`
+    - dans le fichier de configuration `/etc/apache2/ports.conf`
+
+```bash
+## Extranet PORT
+Listen 150.10.0.5:80
+Listen 150.10.0.5:443
+
+## Intranet PORT
+Listen 192.168.10.5:5501
+Listen 192.168.10.5:5502
+```
+*Note : Pour que VirtualBox gèrent correctement les deux pattes réseaux, on force l'écoute respective*
+- *de la patte réseau `150.10.0.5` sur le port `80` et `443`*
+- *de la seconde patte réseau `192.168.10.5` sur `5501` et `5502`*
+
+Nous pouvons maintenant passez à la **configuration** de la VHost nommé **intranet.conf**
+
+```bash
+## CONFIG HTTP sur 5501 et REDIRECTION VERS HTTPS sur 5502
+<VirtualHost 192.168.10.5:5501>
+    ## NAME & DOC ROOT
+    ServerName intranet.valserac.com
+    DocumentRoot /var/www/intranet.valserac.com
+
+    ## FORCER REDIRECTION VERS HTTPS:5502
+    Redirect / https://intranet.valserac.com:5502/
+
+    ## SETUP LOGS
+    ErrorLog ${APACHE_LOG_DIR}/intranet_error.log
+    CustomLog ${APACHE_LOG_DIR}/intranet_access.log combined
+</VirtualHost>
+
+## INTRANET HTTPS sur 5502 et LIMITATION a 192.168.10.0/24
+<VirtualHost 192.168.10.5:5502>
+    ## NAME & DOC ROOT
+    ServerName intranet.valserac.com
+    DocumentRoot /var/www/intranet.valserac.com
+
+    ## ACTIVITE CERTIFACT SSL 
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/intranet.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/intranet.key
+
+    ## PROTOCOLE SSL SECURISES 
+    SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
+    SSLHonorCipherOrder on
+
+    ## EN TETE SECURITE 
+    Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+
+    ## DESACTIVATION LISTAGE & LIMITATION IP
+    <Directory /var/www/intranet.valserac.com>
+        DirectoryIndex index.html index.php
+        Options -Indexes -FollowSymLinks
+        AllowOverride None
+        Require all granted
+        ## LIMITATION a 192.168.10.0/24
+        Require ip 192.168.10.0/24
+    </Directory>
+
+    ## SETUP LOGS 
+    ErrorLog ${APACHE_LOG_DIR}/intranet_error.log
+    CustomLog ${APACHE_LOG_DIR}/intranet_access.log combined
+</VirtualHost>
+```
+Une fois **activé** avec le m**odule a2** et **relancé le systeme** apache avec les commandes plus haut. Nous pouvons donc maintenant tester sur nos `vm-dev` et `vm-graphiste`
+
+---
+### Teste realisé sur la `vm-graphiste` et `vm-dev`
+- Configuration du `/ect/hosts/` pour `192.168.10.5 intranet.valserac.com`
+
+![Test Extranet sur HTTPS](./captures/capture_intranet_https.jpeg)       
+![Test Extranet sur HTTPS](./captures/capture_intranet.jpeg)
+![Test Extranet sur HTTPS](./captures/capture_intranet_certificat.jpeg)
+
+On a donc un Intranet sur **intranet.valserac.com**:
+- [x] **Ouvert** sur l'interface 192.168.10.5 du serveur
+- [x] **Redirection Actif** de `:5501` → `:5502` en HTTPS
+- [x] **Certificat SSL Actif** sur *intranet.valserac.com*
