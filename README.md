@@ -54,7 +54,7 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
     - Pour extranet (eth1) : `150.10.0.5/16`
 
     - Fichier de Configuration IP avec Netplan créé ici : `/etc/netplan/00-installer-config.yaml`
-    ```network:
+    <pre>```yaml network:
         version: 2
         ethernets:
             eth0:
@@ -65,10 +65,8 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
                     addresses: [8.8.8.8,8.8.4.4]
             eth1:
                 dhcp4: no
-                addresses: [150.10.0.10/16]
-                
-    ```
+                addresses: [150.10.0.10/16]           
+    ```</pre>
 
     - Appliquer la Configuration : `sudo netplan apply`
 
-    
