@@ -5,7 +5,7 @@
 ## ![Static Badge](https://img.shields.io/badge/Mission%20-red) Detail Mission 
 **Objectif :** Créer un prototype opérationnel pour **l’EXTRANET** et **l’INTRANET** de la **mairie de Valserac**, 
 - incluant : 
-    - Serveur LAMP sécurisé, 
+    - Serveur Web sécurisé, 
     - Serveur FTP sécurisé en FTPS
     - Filtrage réseau,
     - Protection avancée.
@@ -390,3 +390,195 @@ On a donc un Intranet sur **intranet.valserac.com**:
 - [x] **Ouvert** sur l'interface 192.168.10.5 et uniquement accessible par la patte réseau `192.168.10.0/24`
 - [x] **Redirection Actif** de `:5501` → `:5502` en HTTPS
 - [x] **Certificat SSL Actif** sur *intranet.valserac.com*
+
+---
+
+![Static Badge](https://img.shields.io/badge/FTPS-8A7BE2) ![Static Badge](https://img.shields.io/badge/Configuration-8A5BE2)
+## Configuration du Service FTPS
+
+- Nous allons maintenant passez à la configuration du service FTP Sécurisé pour nos déveoppeur et Graphiste
+- Rappels de la configuration necessaire : 
+    - Les graphistes doivent pouvoir acceder au fichier /`images` de chaque site 
+    - Les developpeurs doivent pouvoir avoir **acces à l'ensemble** des fichiers des sites. 
+
+- Pour le service FTP nous allons utilisé le service `vsftp`
+
+```bash
+sudo apt install vsftpd -y                       ##Installation 
+sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.backup ##Backup de la config initial
+```
+- Nous allons editer le fichier de configuration du service `vsftp`
+    - ici `/etc/vsftpd.conf`
+- Nous allons également **générer un certificat TLS** pour le service FTP afin de sécuriser les tranferts ici 
+
+![Static Badge](https://img.shields.io/badge/Certificat%20TLS-8A7BE2)
+```bash
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+-keyout /etc/apache2/ssl/vsftpd.key \
+-out /etc/apache2/ssl/vsftpd.pem
+```
+![Static Badge](https://img.shields.io/badge/vsftpd.conf-8A7BE2)
+- Configuration supplémentaire apporté : 
+    - Ecoute sur les ports `40000` et `40100`
+    - En acces uniquement via l'interface réseau `192.168.10.5`
+
+```bash
+## PARAMETRE généraux
+listen=YES
+listen_ipv6=NO
+
+write_enable=YES
+dirmessage_enable=YES
+use_localtime=YES
+xferlog_enable=YES
+xferlog_std_format=YES
+secure_chroot_dir=/var/run/vsftpd/empty
+pam_service_name=vsftpd
+
+## Désactiver Acces anonyme
+anonymous_enable=NO
+
+listen_address=192.168.10.5
+
+## Configuration du chroot utilisateurs
+local_enable=YES
+chroot_local_user=YES
+allow_writeable_chroot=YES
+local_root=/var/www
+
+
+## Configuration du mode passif
+pasv_enable=YES
+pasv_min_port=40000
+pasv_max_port=40100
+pasv_address=192.168.10.5
+
+
+## Configuration de journalisation avancée
+log_ftp_protocol=YES
+xferlog_enable=YES
+xferlog_std_format=YES
+xferlog_file=/var/log/vsftpd.log
+
+
+## SECU Transfert
+rsa_cert_file=/etc/apache2/ssl/vsftpd.pem
+rsa_private_key_file=/etc/apache2/ssl/vsftpd.key
+
+## SSL SECU
+ssl_enable=YES
+allow_anon_ssl=NO
+force_local_data_ssl=YES
+force_local_logins_ssl=YES
+ssl_tlsv1=YES
+ssl_sslv2=NO
+ssl_sslv3=NO
+require_ssl_reuse=NO
+ssl_ciphers=HIGH
+```
+- On va pouvoir **redemarrer** et **activer** les services par default
+
+```bash
+sudo systemctl restart vsftpd
+sudo systemctl enable vsftpd
+sudo systemctl status vsftpd   ##Checker le status actifs
+```
+
+ - Nous allons maintenant pouvoir **créer les groupes** utilisateurs pour l'accès au différents fichiers 
+    - Pour les graphistes 
+        - Groupe : **graph**
+        - user : `testgraph`
+    - Pour les developpeurs 
+        - Groupe : **dev**
+        - user : `testdev`
+    - Pour les graphistes et developpeurs 
+        - Groupe : **web**
+        - user : `testgraph` & `testdev`
+
+```bash
+sudo adduser testgraph              ##Creation user
+sudo adduser testdev               
+sudo groupadd graph                 ##Creation groupe 
+sudo groupadd dev                   
+sudo groupadd web                   
+sudo usermod a-G graph testgraph    ##Ajout des users au groupe
+sudo usermod a-G dev testdev
+sudo usermod a-G web testgraph 
+sudo userùpd a-F web testsdev
+
+sudo passwd testgraph               ##Ajout mot de passe
+sudo passwd testdev
+```
+
+- On peut donc maintenant attribué les bonnes attribution et permission aux dossiers
+- Le choix a été fait de garder apache en proprietaire (www-data) sur l'ensemble des fichiers 
+
+- Pour l'architecture général et l'acces aux dossiers : 
+    - extranet.valserac.com
+    - intranet.valserac.com 
+
+afin de ne pas bloquer les graphistes qui ont seulenement accès au dossier image,
+on a donc  créé le groupe `web` avec `testgraph` et `testdev`, qui auront accès a ces deux dossiers.
+Avec permission de `750`, qui permettraau groupe d'y avoir seulement acces.
+
+```bash
+sudo chown www-data:web /var/www/extranet.valserac.com
+sudo chown www-data:web /var/www/intranet.valserac.com
+sudo chmod 750 /var/www/extranet.valserac.com
+sudo chmod 750 /var/www/intranet.valserac.com
+```
+
+- Puis à l'intérieur de ses deux répertoires, ce sera toujours **apache** en propriétaire et le **groupe dev** qui ont l'accès
+- Avec une permission ici pour une gestion des **développeurs** attribué à `770`
+
+```bash
+sudo chown -R www-data:dev /var/www/extranet.valserac.com/*
+sudo chown -R www-data:dev /var/www/intranet.valserac.com/*
+sudo chmod -R 770 /var/www/extranet.valserac.com/*
+sudo chmod -R 770 /var/www/intranet.valserac.com/*
+```
+- On peut donc mainteant passé à l'attribution du fichier `/images` par le groupe `web` pour : 
+    - Un acces des graphistes
+    - Un acces pour les developpeurs
+
+```bash
+sudo chown -R www-data:web /var/www/extranet.valserac.com/images
+sudo chown -R www-data:web /var/www/intranet.valserac.com/images
+sudo chmod -R 770 /var/www/extranet.valserac.com/images
+sudo chmod -R 770 /var/www/intranet.valserac.com/images 
+```
+- On a donc maintenant un accès spécifique par groupe d'utilisations et une segmentation des permissions
+- Ainsi qu'une configuration de vsftpd utilisable
+
+---
+### Teste du FTPS sur les vm-dev et vm-graphiste 
+
+- Afin de **simuler** un environnement de travail inter-département, le choix s'est porter d'utiliser **FileZilla** 
+- Après avoir installer et configuré la connexion via l'interface de FilZilla avec **l'adresse IP du Serveur**, **Le Users** et **mot de passe** adéquat, configuré en **paramètre passive** comme configuré dans le `vsftpd.conf`
+
+1. **Acces des comptes par fileZilla :**
+
+![Test Extranet sur HTTPS](./captures/file_zila_connexion.jpeg)
+
+2. Connexion avec le compte **Developpeur**
+
+![Test Extranet sur HTTPS](./captures/dev_acces_filezilla.jpeg)
+- [x] **Etablie** ayant acces à l'ensemble des fichiers
+
+3. **Connexion avec le compte Graphiste** ( exemple sur le répertoire `/css`)
+
+![Test Extranet sur HTTPS](./captures/graph_acces_filezilla.jpeg)
+- [x] **Etablie** ayant acces refusé au autres répertoires du site ( exemple sur le répertoire `/css`)
+
+3. **Connexion avec le compte Graphiste** ( exemple sur le répertoire `/images`)
+
+![Test Extranet sur HTTPS](./captures/graph_acces_2_filezilla.jpeg)
+
+- [x] **Etablie** ayant acces reussi sur le dossier `/images`
+- [x] **Test Upload** reussi dans le dossier `/images`
+
+### On a donc maintenant un *service FTP Sécurisé* établie sur notre serveur et un *accès spécifique* par compte *Devloppeur* et *Graphiste*.
+
+---
+
+## Configuration du parfeu avec UFW
