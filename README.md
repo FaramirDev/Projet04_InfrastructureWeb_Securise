@@ -17,7 +17,7 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
 --- 
 
 ## ![Static Badge](https://img.shields.io/badge/Objectif%20-blue) Détail Objectif
-- **n°1.** Installer et configurer une VM Linux avec Ubuntu Server pour le serveur LAMP.
+- **n°1.** Installer et configurer une VM Linux avec Ubuntu Server pour le serveur WEB.
     - Avec deux Pattes Réseaux : 
         - Public simulé avec `150.10.0.0/16`
         - Privé avec `192.168.10.0/24`
@@ -113,6 +113,9 @@ sudo a2dismod autoindex status    ## Desactive module inutiles
 sudo systemctl restart apache2    ## Relancer Apache2
 ```
 
+
+
+
 - Récupération des sites `/extranet` et `/intranet`
 - Placé dans le répertoire `/var/www/`
 
@@ -177,6 +180,28 @@ Rappels Dossier de Configuration : `/etc/apache2/`
 ├── apache2.conf               ## Configuration global d'apache2   
 └── ports.conf                  ## Fichier Configuration des ports 
 ```
+
+![Static Badge](https://img.shields.io/badge/Sécurité%20Generique%20-8A7BE2)
+
+### Mesure de sécurité Générique 
+- Cacher les **informations du serveur** dans le fichier `security.conf`
+```bash
+sudo nano /etc/apache2/conf-enabled/security.conf
+```
+
+- Puis on **modifie** pour **cacher la version** et les **informations** du Server
+- Et désactivé les **requêtes TRACE**
+
+```bash
+# Cacher la version et les informations du serveur
+ServerTokens Prod
+ServerSignature Off
+# Désactiver les requêtes TRACE
+TraceEnable Off
+# Protéger contre les attaques clickjacking et XSS
+Header always append X-Frame-Options SAMEORIGIN
+```
+
 ---
 ![Static Badge](https://img.shields.io/badge/Certificat%20SSL%20-8A7BE2)
 ### **Génération de Certificats SSL Auto-signé avec `openssl`**
@@ -483,7 +508,9 @@ sudo systemctl restart vsftpd
 sudo systemctl enable vsftpd
 sudo systemctl status vsftpd   ##Checker le status actifs
 ```
+![Static Badge](https://img.shields.io/badge/FTPS-8A7BE2) ![Static Badge](https://img.shields.io/badge/Permissions-8A3BE2)
 
+### Gestion des Utilisateurs et Permissions
  - Nous allons maintenant pouvoir **créer les groupes** utilisateurs pour l'accès au différents fichiers 
     - Pour les graphistes 
         - Groupe : **graph**
@@ -547,10 +574,20 @@ sudo chown -R www-data:web /var/www/intranet.valserac.com/images
 sudo chmod -R 770 /var/www/extranet.valserac.com/images
 sudo chmod -R 770 /var/www/intranet.valserac.com/images 
 ```
+
+- **Configuration Spéciale pour le répertoire `/pdf` uniquement accessible par Apache** 
+
+```bash 
+sudo chown -R www-data:www-data /var/www/extranet.valserac.com/pdf
+sudo chmod -R 770 /var/www/extranet.valserac.com/pdf
+```
+
+
 - On a donc maintenant un accès spécifique par groupe d'utilisations et une segmentation des permissions
 - Ainsi qu'une configuration de vsftpd utilisable
 
 ---
+![Static Badge](https://img.shields.io/badge/FTPS-8A7BE2) ![Static Badge](https://img.shields.io/badge/test-8A3BE2)
 ### Teste du FTPS sur les vm-dev et vm-graphiste 
 
 - Afin de **simuler** un environnement de travail inter-département, le choix s'est porter d'utiliser **FileZilla** 
@@ -577,8 +614,154 @@ sudo chmod -R 770 /var/www/intranet.valserac.com/images
 - [x] **Etablie** ayant acces reussi sur le dossier `/images`
 - [x] **Test Upload** reussi dans le dossier `/images`
 
-### On a donc maintenant un *service FTP Sécurisé* établie sur notre serveur et un *accès spécifique* par compte *Devloppeur* et *Graphiste*.
+![Static Badge](https://img.shields.io/badge/FTPS-8A7BE2) ![Static Badge](https://img.shields.io/badge/ETABLIE-8A3BE2)
+
+### On a donc maintenant un service FTP Sécurisé établie sur notre serveur et un accès spécifique par compte *Devloppeur* et *Graphiste*.
 
 ---
-
+![Static Badge](https://img.shields.io/badge/PARFEU-8A7BE2) ![Static Badge](https://img.shields.io/badge/UFW-8A3BE2)
 ## Configuration du parfeu avec UFW
+
+La mise en place du parfeu par **UFW** a été mis a jour durant la mise en place du projet web
+
+- Mais la règle général a été de tout `Deny` dans un premier temps
+- Puis **d'Authorisé** le port `22` pour **SSH** pour administrer le serveur depuis l'Hote
+- D'**Authorisé** le port `80` (HTTP) et `443`(HTTPS) sur l'interface **enp0s8** `150.10.0.5` sur Tout - Simulation Extranet publique
+- D'**Authorisé** le port `5501` et `5502` sur l'interface **enp0s3** uniquement accessible via la patte réseau `192.168.10.0/24`
+- et d'**Authorisé** plusieurs port pour le **FTPS** : 
+    - port `20` et `21` uniquement via `192.168.10.0/24`
+    - puis port `40000:40100` uniquement via `192.168.10.0/24`
+    - et également le port `990` uniquement via `192.168.10.0/24`
+
+```bash
+To                         Action      From
+--                         ------      ----         
+80,443/tcp on enp0s8       ALLOW IN    Anywhere                  
+5501,5502/tcp on enp0s3    ALLOW IN    192.168.10.0/24  
+         
+20/tcp                     ALLOW IN    192.168.10.0/24 
+21/tcp                     ALLOW IN    192.168.10.0/24   
+22/tcp                     ALLOW IN    Anywhere   
+        
+40000:40100/tcp            ALLOW IN    192.168.10.0/24                   
+990/tcp                    ALLOW IN    192.168.10.0/24 
+```
+
+---
+![Static Badge](https://img.shields.io/badge/Securisation-8A7BE2) ![Static Badge](https://img.shields.io/badge/mod_evasive-8A3BE2)
+### Partie Securisation Active 
+1. Défense **Local** (Apache) avec le **mod_evasive** vs attaque type DoS simple / abusive sur Apache
+2. Dégense **Collaboratve** au niveau du Systeme avec **Crowdsec** au niveau des IP
+
+### Partie 1 - Installation et configuration de `mod_evasive`
+**Installation**
+
+```bash
+sudp apt install libapache2-mod-evasive -y      ##Installation du mod evasive
+sudo a2enmod evasive                            ##Activation Evasive avec a2
+```
+**Configuration de base**
+- Fichier de Configuration : `/etc/apache2/mods-available/evasive.conf`
+
+```bash
+<IfModule mod_evasive20.c>
+    DOSHashTableSize    3097
+    DOSPageCount        2              ##Plus de 2 requetes meme pages
+    DOSSiteCount        50
+    DOSPageInterval     1
+    DOSSiteInterval     1
+    DOSBlockingPeriod   10             ##Bloque pour 10sec
+
+    DOSEmailNotify      admin@valserac.com
+    DOSSystemCommand    "su - someuser -c '/sbin/... %s ...'"
+    DOSLogDir           "/var/log/mod_evasive"
+</IfModule>
+```
+
+- [x] Installation et Configuration Simple du `mod_evasive` d'Apache vs les attaques DDos simple
+
+![Static Badge](https://img.shields.io/badge/Securisation-8A7BE2) ![Static Badge](https://img.shields.io/badge/Crowdsec-8A3BE2)
+## Installation et Configuration de Crowdsec
+
+CrowdSec detecte les Intrusions et fait de la prévention
+- Il surveille les logs systeme ( Apache, SSH, FTP, etc )
+- Détecte les Comportements suspects et Bannit automatiquement les IPS
+
+- Bénéficie d'une Base Communautaire regroupant des bibles d'adresse mailveillantes partagé entre les utilisateurs du monde en entier
+
+**1. Instalation de CrowdSec via** 
+```bash
+sudo apt install crowdsec -y
+```
+Crowdsec détecte automatique les services et configure les logs
+
+**2. Check les collections des services pris en charge**
+```bash 
+sudo cscli collections list
+```
+**3. Ajouter le Bouncer ( le Bloqueur )**
+- ici, on veut celui d'apache
+
+```bash
+sudo apt install crowdsec-bouncer-apache -y
+```
+**4. Vérifier que le bouncer est installé via**
+```bash
+sudo cscli bouncers list
+```
+
+**5.Mettre explicitement le liens vers les logs d'Apache pour Crowdsec**
+- Via la configuration du fichier `acquis.yaml`
+- ici : `/etc/crowdsec/acquis.yaml`
+
+Configuration necessaire :
+```bash
+filenames:
+  - /var/log/apache2/access.log
+  - /var/log/apache2/error.log
+labels:
+  type: apache2
+```
+
+**6. Puis relance et checker Crowdsec**
+```bash
+sudo systemctl reload crowdsec
+sudo systemctl status crowdsec
+```
+
+---
+![Static Badge](https://img.shields.io/badge/Securisation-8A7BE2) ![Static Badge](https://img.shields.io/badge/Crowdsec-8A3BE2) ![Static Badge](https://img.shields.io/badge/Console-8A1BE7)
+
+### Après configuration avec la console de Crowdsec & Serveur
+
+- Configurer notre serveur web avec la console Crowdsec
+
+
+![crowdsec console](./captures/crowdsec_console.jpeg)
+
+- S'assurer que les logs des attaques remontes & bloque le IP
+- Test des Scénario d'attaque sur SSH et HTTP généric & remonté
+
+![crowdsec console log](./captures/crowdsec_console_alerte.jpeg)
+
+
+- On a donc mainteant notre serveur web qui possède une sécurisation via 
+    - `mod_evasive` d'Apache vs les **DDos simple**
+    - `Crowdsec` pour une protection Communautaire vs les IPs 
+
+
+### Conclusion du Projet 
+
+Au cours de ce projet sur l'installation et la configuration d'une Infrastructure web via la mairie de Valserac.
+On a pu monter en compétence sur : 
+- l'**Administration système** avec l'installation, la configuration et la gestion de services Linux
+- Le **réseaux**, avec les différents NAT, pare-feu, ports et protcoles
+- Une mise en place de **Cybersécurité**, avec une **protection applicative** de `Crowdsec` et d'une protection de **DDos** avec `Evasive`
+- Une Supervision sur la lecture et exploitation des logs
+- Sur la manipulation applicative des commandes **shell**
+- Ainsi qu'une **redaction de rapport de la documentation technique**
+
+**Merci** d'avoir pris le temps de lire mon projet **d'infrastruce web**, un projet qui s'inscrit dans l'apprentissage et la monté en compétences au travers de la formation **Administrateur système, réseaux et cybersécurité.**
+
+---
+**Alexis alias Faramir!**
