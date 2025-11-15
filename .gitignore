@@ -1,0 +1,23 @@
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environnements virtuels
+env/
+venv/
+.venv/
+
+# Fichiers de logs / output
+*.log
+*.out
+*.tmp
+
+# Fichiers temporaires d’éditeurs
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+
