@@ -87,9 +87,9 @@ Votre mission : fournir un prototype fonctionnel pour valider l’infrastructure
 - Ici le DNS à été simulié via `/etc/hosts` de chaque machine
 
 On a donc maintenant :
-- [x] Serveur Configuré
-- [x] Machine Dev Test Configuré
-- [x] Machine Graphiste Test Configuré
+- [x] Serveur pret
+- [x] Machine Dev Test pret
+- [x] Machine Graphiste Test pret
 - [x] Réseaux Fonctionnel inter-machine
 
 ---
@@ -186,10 +186,10 @@ Rappels Dossier de Configuration : `/etc/apache2/`
 ### Mesure de sécurité Générique 
 - Cacher les **informations du serveur** dans le fichier `security.conf`
 ```bash
-sudo nano /etc/apache2/conf-enabled/security.conf
+sudo nano /etc/apache2/conf-available/security.conf
 ```
 
-- Puis on **modifie** pour **cacher la version** et les **informations** du Server
+- Puis on **modifie** pour **cacher la version** et les **informations** du Serveur
 - Et désactivé les **requêtes TRACE**
 
 ```bash
@@ -734,14 +734,14 @@ sudo systemctl status crowdsec
 
 ### Après configuration avec la console de Crowdsec & Serveur
 
-- Configurer notre serveur web avec la console Crowdsec
+- Configureration de notre serveur avec la console Crowdsec 
 
 
 ![crowdsec console](./captures/crowdsec_console.jpeg)
 
-- S'assurer que les logs des attaques remontes & bloque le IP
-- Test des Scénario d'attaque sur SSH et HTTP généric & remonté
-
+- S'assurer que les logs des attaques remontes & bloque le IP :
+    - Test des Scénario d'attaque sur SSH et HTTP généric 
+- Remonté sur la console Crowdsec 
 ![crowdsec console log](./captures/crowdsec_console_alerte.jpeg)
 
 
