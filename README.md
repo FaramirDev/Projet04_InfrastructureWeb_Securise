@@ -1119,7 +1119,12 @@ mais également avec la **metrics** qui remonte également l'alerte :
 Ce prototype démontre la faisabilité d'une infrastructure mutualisée mais cloisonnée. L'utilisation de solutions Open Source éprouvées combinée à une analyse comportementale (CrowdSec) permet d'atteindre un niveau de sécurité critique adapté aux exigences d'une collectivité territoriale.
 
 ---
+---
+## Licence
+Ce projet est sous licence **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
+Toute utilisation commerciale est strictement interdite sans autorisation préalable. Consultez le fichier [LICENSE](./LICENSE) pour plus de détails.
 
+---
 **Auteur** : **Alexis Rousseau** - Administrateur Systèmes, Réseaux & Cybersécurité.
    
 
